@@ -1,1 +1,17 @@
 // TODO
+.content {
+  max-width: 1440px;
+  background: #1a1d23;
+  //   border: 1px solid red;
+
+  div {
+    max-width: 700px;
+    display: block;
+    margin: 0 auto;
+
+    img {
+      width: 238.62px;
+      height: 25.63px;
+    }
+  }
+}
