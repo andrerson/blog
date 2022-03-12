@@ -1,1 +1,55 @@
 // TODO
+.content {
+  max-width: 1440px;
+}
+
+.posts {
+  max-width: 700px;
+  // height: 108px;
+  margin: 0 auto;
+
+  a {
+    display: block;
+
+    & + a {
+      margin-top: 48px;
+    }
+
+    strong {
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: #f8f8f8;
+    }
+
+    p {
+      line-height: 21.78px;
+      font-weight: 400;
+      color: #d7d7d7;
+    }
+
+    div {
+      width: 263px;
+      margin-top: 24px;
+      color: #bbbbbb;
+
+      time {
+        font-size: 0.875rem;
+        color: #bbbbbb;
+      }
+
+      label {
+        margin-left: 26px;
+        font-size: 0.875rem;
+        color: #bbbbbb;
+      }
+    }
+  }
+
+  a:last-child {
+    margin-top: 4rem;
+    color: #ff57b2;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}

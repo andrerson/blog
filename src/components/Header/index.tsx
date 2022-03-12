@@ -5,8 +5,8 @@ export default function Header() {
   return (
     <div className={styles.content}>
       <div>
-        <img src="Logo.png" alt="alt" />
+        <img src="Logo.png" alt="logo" />
       </div>
     </div>
-  )
+  );
 }
