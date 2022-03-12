@@ -10,6 +10,9 @@ import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import Prismic from '@prismicio/client';
 
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+
 interface Post {
   uid?: string;
   first_publication_date: string | null;
@@ -29,43 +32,28 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home() {
+export default function Home({results, next_page}: PostPagination) {
   return (
     <>
       <Header />
 
       <main className={styles.content}>
         <div className={styles.posts}>
-          <a>
-            <strong>Como utilizar Hooks</strong>
-            <p>Pensando em sincronização em vez de ciclos de vida.</p>
+
+          {results.map(post => ( <a>
+            <strong>{post.data.title}</strong>
+            <p>{post.data.subtitle}</p>
             <div>
               <time>
-                <FiCalendar width={20} height={20} /> 15 Mar 2021
+                <FiCalendar width={20} height={20} /> {post.first_publication_date}
               </time>
               <label>
-                <FiUser width={20} height={20} /> Joseph Oliveira
+                <FiUser width={20} height={20} /> {post.data.author}
               </label>
             </div>
-          </a>
-
-          <a>
-            <strong>Criando um app CRA do zero</strong>
-            <p>
-              Tudo sobre como criar a sua primeira aplicação utilizando Create
-              React App
-            </p>
-            <div>
-              <time>
-                <FiCalendar width={20} height={20} /> 29 Abr 2021
-              </time>
-              <label>
-                <FiUser width={20} height={20} /> Anderson Freitas
-              </label>
-            </div>
-          </a>
-
-          <a>Carregar mais posts</a>
+          </a>))}
+        
+          {next_page ? <a>Carregar mais posts</a> : ''}
         </div>
       </main>
     </>
@@ -76,14 +64,38 @@ export const getStaticProps = async () => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query([
     Prismic.predicates.at('document.type', 'posts'),
-  ]);
+  ], {
+    pageSize: 20
+  });
 
-  console.log(postsResponse);
+  console.log(postsResponse)
+
+
+  
+
+  const posts = postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: format(
+        new Date(),
+        post.first_publication_date,
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author
+      }
+    }
+  })
 
   // TODO
   return {
     props: {
-      postsResponse,
+      results: posts,
+      next_page: postsResponse.next_page
     },
   };
 };
