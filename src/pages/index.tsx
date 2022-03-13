@@ -13,6 +13,9 @@ import Prismic from '@prismicio/client';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
+import Link from 'next/link';
+import { useState } from 'react';
+
 interface Post {
   uid?: string;
   first_publication_date: string | null;
@@ -32,70 +35,108 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home({results, next_page}: PostPagination) {
+export default function Home({ postsPagination }: HomeProps) {
+  const [posts, setPosts] = useState(postsPagination.results);
+  // const [nextPage, setNextPage] = useState(postsPagination.next_page);
+
+  function handleNextPagePosts() {
+    fetch(`${postsPagination.next_page}`)
+      .then(response => response.json())
+      .then(data => {
+        const nextPosts = data.results.map(post => {
+          return {
+            uid: post.uid,
+            first_publication_date: format(
+              new Date(post.first_publication_date),
+              'd MMM yyyy',
+              {
+                locale: ptBR,
+              }
+            ),
+            data: {
+              title: post.data.title,
+              subtitle: post.data.subtitle,
+              author: post.data.author,
+            },
+          };
+        });
+
+        const nextPagePost = [...posts, ...nextPosts];
+        postsPagination.next_page = data.next_page;
+        setPosts(nextPagePost);
+      });
+  }
+
   return (
     <>
       <Header />
 
       <main className={styles.content}>
         <div className={styles.posts}>
+          {posts.map(post => (
+            <Link href={`/post/${post.uid}`} key={post.uid}>
+              <a>
+                <strong>{post.data.title}</strong>
+                <p>{post.data.subtitle}</p>
+                <div>
+                  <time>
+                    <FiCalendar width={20} height={20} />{' '}
+                    {format(
+                      new Date(post.first_publication_date),
+                      'd MMM yyyy',
+                      {
+                        locale: ptBR,
+                      }
+                    )}
+                  </time>
+                  <label>
+                    <FiUser width={20} height={20} /> {post.data.author}
+                  </label>
+                </div>
+              </a>
+            </Link>
+          ))}
 
-          {results.map(post => ( <a>
-            <strong>{post.data.title}</strong>
-            <p>{post.data.subtitle}</p>
-            <div>
-              <time>
-                <FiCalendar width={20} height={20} /> {post.first_publication_date}
-              </time>
-              <label>
-                <FiUser width={20} height={20} /> {post.data.author}
-              </label>
-            </div>
-          </a>))}
-        
-          {next_page ? <a>Carregar mais posts</a> : ''}
+          {postsPagination.next_page ? (
+            <a onClick={handleNextPagePosts}>Carregar mais posts</a>
+          ) : (
+            ''
+          )}
         </div>
       </main>
     </>
   );
 }
 
-export const getStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
-  const postsResponse = await prismic.query([
-    Prismic.predicates.at('document.type', 'posts'),
-  ], {
-    pageSize: 20
-  });
-
-  console.log(postsResponse)
-
-
-  
+  const postsResponse = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      pageSize: 3,
+    }
+  );
 
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(),
-        post.first_publication_date,
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
-        author: post.data.author
-      }
-    }
-  })
+        author: post.data.author,
+      },
+    };
+  });
 
   // TODO
   return {
     props: {
-      results: posts,
-      next_page: postsResponse.next_page
+      postsPagination: {
+        results: posts,
+        next_page: postsResponse.next_page,
+      },
+      revalidate: 10, // In seconds
     },
   };
 };

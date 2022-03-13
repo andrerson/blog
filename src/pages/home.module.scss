@@ -10,6 +10,7 @@
 
   a {
     display: block;
+    text-decoration: none;
 
     & + a {
       margin-top: 48px;
@@ -28,18 +29,19 @@
     }
 
     div {
-      width: 263px;
       margin-top: 24px;
       color: #bbbbbb;
 
       time {
         font-size: 0.875rem;
+        font-weight: 400;
         color: #bbbbbb;
       }
 
       label {
         margin-left: 26px;
         font-size: 0.875rem;
+        font-weight: 400;
         color: #bbbbbb;
       }
     }
