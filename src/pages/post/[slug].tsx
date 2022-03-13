@@ -40,7 +40,7 @@ interface PostProps {
 export default function Post({ post }: PostProps) {
   // TODO
   const router = useRouter();
-  const text = post?.data.content.reduce((text, post) => {
+  const text = post.data.content.reduce((text, post) => {
     return text + RichText.asText(post.body);
   }, '');
 
@@ -53,10 +53,10 @@ export default function Post({ post }: PostProps) {
   return (
     <>
       <Header />
-      <main className={styles.content}>
+      <main className={`${styles.content} ${commonStyles.content}`}>
         <img src={post.data.banner.url} alt="banner" />
 
-        {post.data.title ? '' : <h1>Carregando...</h1>}
+        {!post.data.title && <h1>Carregando...</h1>}
 
         <article>
           <h1>{post.data.title}</h1>
@@ -79,14 +79,11 @@ export default function Post({ post }: PostProps) {
           {post.data.content.map(postContet => (
             <div className={styles.post} key={postContet.heading}>
               <h2>{postContet.heading}</h2>
-              {postContet.body.map(postBody => (
-                <div
-                  key={postBody.text}
-                  dangerouslySetInnerHTML={{
-                    __html: postBody.text,
-                  }}
-                ></div>
-              ))}
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: RichText.asHtml(postContet.body),
+                }}
+              ></div>
             </div>
           ))}
         </article>
@@ -122,6 +119,13 @@ export const getStaticProps: GetStaticProps = async context => {
     {}
   );
 
+  const contentPosts = response.data.content.map(post => {
+    return {
+      heading: post.heading,
+      body: post.body,
+    };
+  });
+
   const post = {
     first_publication_date: response.first_publication_date,
     data: {
@@ -131,7 +135,7 @@ export const getStaticProps: GetStaticProps = async context => {
         url: response.data.banner.url,
       },
       author: response.data.author,
-      content: response.data.content,
+      content: contentPosts,
     },
     uid: response.uid,
   };
@@ -139,6 +143,6 @@ export const getStaticProps: GetStaticProps = async context => {
   // TODO
   return {
     props: { post },
-    revalidate: 10, // 10 segundes
+    revalidate: 10, // 10 In seconds
   };
 };

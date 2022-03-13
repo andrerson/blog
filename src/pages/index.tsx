@@ -71,7 +71,7 @@ export default function Home({ postsPagination }: HomeProps) {
     <>
       <Header />
 
-      <main className={styles.content}>
+      <main className={commonStyles.content}>
         <div className={styles.posts}>
           {posts.map(post => (
             <Link href={`/post/${post.uid}`} key={post.uid}>
@@ -97,10 +97,8 @@ export default function Home({ postsPagination }: HomeProps) {
             </Link>
           ))}
 
-          {postsPagination.next_page ? (
+          {postsPagination.next_page && (
             <a onClick={handleNextPagePosts}>Carregar mais posts</a>
-          ) : (
-            ''
           )}
         </div>
       </main>
